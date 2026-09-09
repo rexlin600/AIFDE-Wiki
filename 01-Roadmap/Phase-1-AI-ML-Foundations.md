@@ -29,6 +29,8 @@ tags:
 
 核心主题达到 L2，数据泄漏、验证设计和指标选择开始向 L3 推进：
 
+领域入口：[数学与 AI 基础](../02-AI-Foundations/AI-Foundations-MOC.md) → [机器学习](../03-Machine-Learning/Machine-Learning-MOC.md) → [深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)。
+
 - 向量、矩阵、导数、梯度、概率分布、期望、方差、熵和交叉熵的工程直觉。
 - 监督学习与无监督学习；回归、分类、聚类及一个朴素业务基线。
 - 训练/验证/测试拆分、交叉验证、过拟合、正则化、数据泄漏与类别不平衡。

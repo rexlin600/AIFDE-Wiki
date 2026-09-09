@@ -21,22 +21,22 @@ tags:
 
 这张内容地图（Map of Content，MOC）描述面向生产级 AI 与 FDE 的知识主干、依赖关系和默认投入。它不是“所有 AI 名词”的清单，也不是严格线性的课程：读者应从已有的软件工程基础出发，沿项目暴露的问题回到相应领域补齐知识。
 
-各领域 MOC 尚未创建，本页暂以无链接领域名称表示入口；对应文件落地后再替换为真实相对链接。
+已建立数学与 AI 基础、机器学习、深度学习和 LLM 的领域 MOC；其余领域在对应文件落地前继续使用无链接名称，避免制造死链。
 
 ## 主干依赖
 
 默认依赖链如下：
 
-1. 数学与 AI 基础支撑机器学习、深度学习及评测解释。
-2. 机器学习建立数据、泛化和指标意识，深度学习提供表示学习和现代模型基础。
-3. LLM 依赖深度学习中的 Attention、Transformer、优化和推理知识。
-4. RAG、Agent 与多模态在 LLM 能力上组合检索、工具、状态和其他模态。
+1. [数学与 AI 基础](../02-AI-Foundations/AI-Foundations-MOC.md)支撑[机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)、[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)及评测解释。
+2. [机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)建立数据、泛化和指标意识，[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)提供表示学习和现代模型基础。
+3. [LLM](../05-LLM/LLM-MOC.md)依赖[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)中的 Attention、Transformer、优化和推理知识。
+4. RAG、Agent 与多模态在 [LLM](../05-LLM/LLM-MOC.md) 能力上组合检索、工具、状态和其他模态。
 5. 生产工程与安全治理贯穿数据、模型、RAG、Agent 和多模态，而非最后补做。
 6. FDE 实践把上述技术置于客户目标、企业集成、上线、采用和交接约束中。
 
 可以把它理解为三条并行且反复汇合的路径：模型与数据能力回答“系统能做什么”，生产与安全回答“系统能否可靠负责地运行”，FDE 实践回答“系统是否解决真实问题并被客户采用”。
 
-## 数学与 AI 基础
+## [数学与 AI 基础](../02-AI-Foundations/AI-Foundations-MOC.md)
 
 **领域边界：** 提供理解模型、损失、优化、相似度和不确定性的最低数学语言；不以完整数学专业训练为目标。
 
@@ -46,7 +46,7 @@ tags:
 
 **下游：** 机器学习、深度学习、Embedding 检索、模型评测与容量分析。
 
-## 机器学习
+## [机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)
 
 **领域边界：** 学习从数据、特征、目标和验证方案构建可泛化预测系统的方法，也是判断“是否真的需要 LLM”的基线能力。
 
@@ -56,7 +56,7 @@ tags:
 
 **上下游：** 依赖数学与数据工程；为深度学习、排序、评测设计和业务基线提供方法。
 
-## 深度学习
+## [深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)
 
 **领域边界：** 解释神经网络如何学习表示，以及如何用 PyTorch 构建、训练和评估模型。
 
@@ -66,7 +66,7 @@ tags:
 
 **上下游：** 依赖数学与机器学习的泛化意识；直接支撑 LLM、视觉语言模型和模型服务。
 
-## LLM
+## [LLM](../05-LLM/LLM-MOC.md)
 
 **领域边界：** 覆盖大语言模型（Large Language Model，LLM）的表示、训练、适配、推理和应用接口，不把模型 API 调用等同于完整工程能力。
 

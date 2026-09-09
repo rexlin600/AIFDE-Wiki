@@ -28,6 +28,8 @@ tags:
 
 Tokenizer、Prompt、结构化输出和模型评测达到 L3；Transformer、微调和推理机制至少达到 L2：
 
+领域入口：[LLM](../05-LLM/LLM-MOC.md)，必要时回到[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)补齐 Transformer、优化与 PyTorch 工程基础。
+
 - Tokenizer、词表、特殊 Token、序列长度与中英文 Token 成本。
 - Embedding、位置表示、Attention、Transformer Block 和自回归生成。
 - 系统/用户消息、Prompt、Context Engineering、Few-shot 与失败边界。
