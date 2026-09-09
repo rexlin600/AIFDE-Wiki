@@ -3,5 +3,12 @@
   "useMarkdownLinks": true,
   "alwaysUpdateLinks": true,
   "attachmentFolderPath": "99-Assets",
-  "showUnsupportedFiles": true
+  "showUnsupportedFiles": true,
+  "showLineNumber": false,
+  "readableLineLength": false,
+  "showInlineTitle": true,
+  "defaultViewMode": "preview",
+  "strictLineBreaks": false,
+  "propertiesInDocument": "hidden",
+  "promptDelete": false
 }
