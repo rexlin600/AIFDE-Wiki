@@ -251,8 +251,8 @@ LoRA.md
 内部链接示例：
 
 ```markdown
-[混合检索](./Retrieval/混合检索%20(Hybrid%20Search).md)
-[重排序](./Retrieval/重排序%20(Reranking).md)
+[混合检索](./Retrieval/混合检索%20%28Hybrid%20Search%29.md)
+[重排序](./Retrieval/重排序%20%28Reranking%29.md)
 ```
 
 ## 7. 知识覆盖范围
