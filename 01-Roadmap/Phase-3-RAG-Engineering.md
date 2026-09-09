@@ -28,6 +28,8 @@ tags:
 
 RAG 主链路达到 L3，高级 RAG 至少达到 L2：
 
+领域入口：[RAG](../06-RAG/RAG-MOC.md)，并按需进入[生产 AI](../09-Production-AI/Production-AI-MOC.md)与[安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)补齐运行和权限边界。
+
 - 文档解析、清洗、切分、元数据、增量摄取和版本/删除传播。
 - Sparse、Dense、Hybrid Retrieval，Metadata Filtering 与访问控制。
 - Top-k、Reranker、Context Packing、Grounding 和可核验引用。
@@ -84,4 +86,4 @@ RAG 主链路达到 L3，高级 RAG 至少达到 L2：
 - 一条开源查询调用链和可运行的检索融合最小复刻。
 - 能进行企业 RAG 系统设计、故障定位和项目取舍答辩。
 
-完成后可进入 [阶段 4：Agent 工程](Phase-4-Agent-Engineering.md)；若更急需上线，可先阅读 [阶段 5：生产 AI](Phase-5-Production-AI.md) 并只执行适用于当前 RAG 的加固项。
+完成后可进入 [阶段 4：Agent 工程](Phase-4-Agent-Engineering.md)；若更急需上线，可先阅读 [阶段 5：生产 AI](Phase-5-Production-AI.md) 并只执行适用于当前 [RAG](../06-RAG/RAG-MOC.md) 的加固项。

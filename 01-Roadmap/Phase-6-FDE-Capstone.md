@@ -28,6 +28,8 @@ tags:
 
 目标是把技术与交付整合为 L4 证据：
 
+领域入口：[FDE 实践](../11-FDE-Practice/FDE-Practice-MOC.md)，并结合[生产 AI](../09-Production-AI/Production-AI-MOC.md)与[安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)完成上线、运行和交接。
+
 - Discovery：利益相关者、用户、现有流程、异常路径、约束和待验证假设。
 - 业务建模：基线、业务指标、价值、风险、采用条件和停止条件。
 - PoC 范围：最小垂直切片、成功标准、非目标、时间盒和决策门。

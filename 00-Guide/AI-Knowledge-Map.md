@@ -21,7 +21,7 @@ tags:
 
 这张内容地图（Map of Content，MOC）描述面向生产级 AI 与 FDE 的知识主干、依赖关系和默认投入。它不是“所有 AI 名词”的清单，也不是严格线性的课程：读者应从已有的软件工程基础出发，沿项目暴露的问题回到相应领域补齐知识。
 
-已建立数学与 AI 基础、机器学习、深度学习和 LLM 的领域 MOC；其余领域在对应文件落地前继续使用无链接名称，避免制造死链。
+十个领域 MOC 均已建立；本页只链接已存在的权威入口，尚未建立的原子主题笔记继续保持无链接，避免制造死链。
 
 ## 主干依赖
 
@@ -30,9 +30,9 @@ tags:
 1. [数学与 AI 基础](../02-AI-Foundations/AI-Foundations-MOC.md)支撑[机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)、[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)及评测解释。
 2. [机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)建立数据、泛化和指标意识，[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)提供表示学习和现代模型基础。
 3. [LLM](../05-LLM/LLM-MOC.md)依赖[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)中的 Attention、Transformer、优化和推理知识。
-4. RAG、Agent 与多模态在 [LLM](../05-LLM/LLM-MOC.md) 能力上组合检索、工具、状态和其他模态。
-5. 生产工程与安全治理贯穿数据、模型、RAG、Agent 和多模态，而非最后补做。
-6. FDE 实践把上述技术置于客户目标、企业集成、上线、采用和交接约束中。
+4. [RAG](../06-RAG/RAG-MOC.md)、[Agent](../07-Agent/Agent-MOC.md)与[多模态 AI](../08-Multimodal-AI/Multimodal-AI-MOC.md)在 [LLM](../05-LLM/LLM-MOC.md) 能力上组合检索、工具、状态和其他模态。
+5. [生产 AI](../09-Production-AI/Production-AI-MOC.md)与[安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)贯穿数据、模型、RAG、Agent 和多模态，而非最后补做。
+6. [FDE 实践](../11-FDE-Practice/FDE-Practice-MOC.md)把上述技术置于客户目标、企业集成、上线、采用和交接约束中。
 
 可以把它理解为三条并行且反复汇合的路径：模型与数据能力回答“系统能做什么”，生产与安全回答“系统能否可靠负责地运行”，FDE 实践回答“系统是否解决真实问题并被客户采用”。
 
@@ -76,7 +76,7 @@ tags:
 
 **上下游：** 依赖深度学习；向 RAG、Agent、多模态和生产级模型网关提供核心能力。
 
-## RAG
+## [RAG](../06-RAG/RAG-MOC.md)
 
 **领域边界：** 检索增强生成（Retrieval-Augmented Generation，RAG）通过外部证据约束生成，重点是数据摄取、检索、上下文构造、引用与端到端评测，而不是“接一个向量数据库”。
 
@@ -86,7 +86,7 @@ tags:
 
 **上下游：** 依赖 LLM、Embedding、信息检索和数据工程；与 Agent 的工具使用、生产工程的可观测性、安全治理的访问控制紧密耦合。
 
-## Agent
+## [Agent](../07-Agent/Agent-MOC.md)
 
 **领域边界：** Agent 系统让模型在受控循环中观察状态、选择工具并推进任务；重点是边界、可靠性和评测，不以自主性最大化为目标。
 
@@ -96,7 +96,7 @@ tags:
 
 **上下游：** 依赖 LLM、RAG、API 与分布式系统；生产可靠性、安全权限和 FDE 流程建模决定其可上线边界。
 
-## 多模态
+## [多模态 AI](../08-Multimodal-AI/Multimodal-AI-MOC.md)
 
 **领域边界：** 处理文本之外的图像、文档、音频和视频输入输出，并把模态能力接入检索、交互和工作流。
 
@@ -106,7 +106,7 @@ tags:
 
 **上下游：** 依赖深度学习和 LLM；常与 RAG、Agent 组合，并引入额外的延迟、隐私、版权和安全问题。
 
-## 生产工程
+## [生产 AI](../09-Production-AI/Production-AI-MOC.md)
 
 **领域边界：** 使 AI 系统可部署、可评测、可观测、可扩展和可运维，覆盖从数据管道到推理服务和发布流程的生命周期。
 
@@ -116,7 +116,7 @@ tags:
 
 **上下游：** 横切 LLM、RAG、Agent 和多模态；其证据也是 FDE 上线、验收和交接的基础。
 
-## 安全治理
+## [安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)
 
 **领域边界：** 管理 AI 特有攻击面和传统企业安全要求，确保数据、模型、工具和用户处于可审计的授权边界内。
 
@@ -126,7 +126,7 @@ tags:
 
 **上下游：** 从需求发现和数据接入阶段开始，贯穿 RAG、Agent、生产发布、运行和下线。
 
-## FDE 实践
+## [FDE 实践](../11-FDE-Practice/FDE-Practice-MOC.md)
 
 **领域边界：** FDE 在真实客户环境中把模糊目标转化为可衡量、可运行、可采用并可交接的产品能力；它不是售前演示，也不是只完成一次 PoC。
 

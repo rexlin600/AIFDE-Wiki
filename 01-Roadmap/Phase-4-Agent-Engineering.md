@@ -28,6 +28,8 @@ tags:
 
 单 Agent/工作流、Tool 与状态管理达到 L3；多 Agent 与协议互操作至少达到 L2：
 
+领域入口：[Agent](../07-Agent/Agent-MOC.md)，并按需回到 [RAG](../06-RAG/RAG-MOC.md)或进入[安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)明确证据与工具权限。
+
 - Workflow 与 Agent 的控制权差异，以及何时不用 Agent。
 - Tool Schema、权限、副作用、超时、错误语义、幂等和补偿操作。
 - 显式 State、短期/长期 Memory、上下文裁剪和数据生命周期。
@@ -85,4 +87,4 @@ tags:
 - 一条开源 Agent 调用链和有限状态执行器最小复刻。
 - 能在面试中解释控制权、安全、可靠性和多 Agent 取舍。
 
-证据齐全后进入 [阶段 5：生产 AI](Phase-5-Production-AI.md)。
+证据齐全后进入 [阶段 5：生产 AI](Phase-5-Production-AI.md)，并以[生产 AI MOC](../09-Production-AI/Production-AI-MOC.md)组织加固能力。

@@ -29,6 +29,8 @@ tags:
 
 核心生产能力达到 L3，并用一次受控上线/演练向 L4 证据推进：
 
+领域入口：[生产 AI](../09-Production-AI/Production-AI-MOC.md)与[安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)，对既有 [RAG](../06-RAG/RAG-MOC.md)或 [Agent](../07-Agent/Agent-MOC.md)项目做纵向加固。
+
 - 模型网关、供应商抽象、路由、限流、预算、缓存和 Fallback。
 - 超时、重试、熔断、背压、幂等、队列与优雅降级。
 - Logs、Metrics、Traces、评测结果关联和 SLI/SLO。
@@ -86,4 +88,4 @@ tags:
 - Runbook、一次故障注入、一次回滚和一份无责复盘。
 - 一条开源生产调用链、最小适配层和完整系统设计答辩。
 
-证据齐全后进入 [阶段 6：FDE 综合项目](Phase-6-FDE-Capstone.md)。
+证据齐全后进入 [阶段 6：FDE 综合项目](Phase-6-FDE-Capstone.md)，并以 [FDE 实践](../11-FDE-Practice/FDE-Practice-MOC.md)组织客户交付证据。

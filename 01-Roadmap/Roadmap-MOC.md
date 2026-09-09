@@ -22,7 +22,7 @@ tags:
 
 本路线面向已有后端或全栈经验、希望转向 AI 应用工程与前沿部署工程（Forward Deployed Engineering，FDE）的工程师。默认每周投入 5～10 小时；各阶段周期是用于安排实验和项目的建议，不是硬期限。已有证据满足退出标准时可以跳过，项目暴露能力缺口时也应回到前一阶段补齐。
 
-开始前建议先阅读 [AI 全局知识地图](../00-Guide/AI-Knowledge-Map.md) 和 [FDE 能力模型](../00-Guide/FDE-Competency-Model.md)。基础阶段可进入[数学与 AI 基础](../02-AI-Foundations/AI-Foundations-MOC.md)、[机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)、[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)和 [LLM](../05-LLM/LLM-MOC.md) 领域 MOC；RAG、Agent、生产 AI、安全治理和 FDE 实践在对应 MOC 创建前保留为无链接名称。
+开始前建议先阅读 [AI 全局知识地图](../00-Guide/AI-Knowledge-Map.md) 和 [FDE 能力模型](../00-Guide/FDE-Competency-Model.md)。基础阶段可进入[数学与 AI 基础](../02-AI-Foundations/AI-Foundations-MOC.md)、[机器学习](../03-Machine-Learning/Machine-Learning-MOC.md)、[深度学习](../04-Deep-Learning/Deep-Learning-MOC.md)和 [LLM](../05-LLM/LLM-MOC.md)；应用与交付阶段进入 [RAG](../06-RAG/RAG-MOC.md)、[Agent](../07-Agent/Agent-MOC.md)、[多模态 AI](../08-Multimodal-AI/Multimodal-AI-MOC.md)、[生产 AI](../09-Production-AI/Production-AI-MOC.md)、[安全治理](../10-AI-Safety-Governance/AI-Safety-Governance-MOC.md)和 [FDE 实践](../11-FDE-Practice/FDE-Practice-MOC.md)领域 MOC。
 
 ## 七阶段依赖与建议周期
 
