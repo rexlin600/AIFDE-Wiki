@@ -58,7 +58,7 @@ AI 与前沿部署工程（Forward Deployed Engineering，FDE）的学习资料�
 
 ## 架构
 
-仓库采用“稳定领域目录 + MOC 导航 + 适度原子化笔记”。`00-Guide` 提供总入口与能力模型，`01-Roadmap` 组织阶段，知识领域目录保存内容，`12-Projects` 至 `15-Job-Market` 保存证据；`90-Templates` 统一九类笔记结构。Python 校验器、markdownlint 与 GitHub Actions 形成质量门禁，Obsidian 只承担编辑增强。
+仓库采用“稳定领域目录 + MOC 导航 + 适度原子化笔记”。`00-Guide` 提供总入口与能力模型，`01-Roadmap` 组织阶段，知识领域目录保存内容，`12-Projects` 至 `15-Job-Market` 保存证据；`Z-模板` 统一九类笔记结构。Python 校验器、markdownlint 与 GitHub Actions 形成质量门禁，Obsidian 只承担编辑增强。
 
 ## 关键决策
 
@@ -91,7 +91,7 @@ AI 与前沿部署工程（Forward Deployed Engineering，FDE）的学习资料�
 - [AI 全局知识地图](../A-%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97/01-AI%20%E7%9F%A5%E8%AF%86%E5%9C%B0%E5%9B%BE.md)
 - [FDE 能力模型](../A-%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97/02-FDE%20%E8%83%BD%E5%8A%9B%E6%A8%A1%E5%9E%8B.md)
 - [路线总览](../B-%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/00-%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF-MOC.md)
-- [文档模板目录](../90-Templates/Template-MOC.md)
+- [文档模板目录](../Z-模板/Template-MOC.md)
 
 ## 面试追问
 

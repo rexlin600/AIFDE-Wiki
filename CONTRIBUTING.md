@@ -18,7 +18,7 @@ npm ci
 - 概念文件可使用中文名称，并在首次出现时给出标准英文名称。
 - 实验使用 `EXP-YYYYMMDD-Topic.md`，项目使用 `PRJ-Topic.md`，决策使用 `ADR-NNN-Topic.md`，复盘使用 `RETRO-Topic.md`。
 - 一个概念只保留一篇权威笔记；跨目录关系用相对 Markdown 链接表达。
-- 图片和附件放在 `99-Assets`，使用描述性名称，并记录原创、许可或来源。
+- 图片和附件放在 `Z-资源`，使用描述性名称，并记录原创、许可或来源。
 
 ## Properties 枚举
 
@@ -38,7 +38,7 @@ npm ci
 
 ## 九类模板
 
-从对应模板开始创建内容：[MOC](90-Templates/Template-MOC.md)、[Concept](90-Templates/Template-Concept.md)、[Pattern](90-Templates/Template-Pattern.md)、[Experiment](90-Templates/Template-Experiment.md)、[Project](90-Templates/Template-Project.md)、[Source](90-Templates/Template-Source.md)、[Interview](90-Templates/Template-Interview.md)、[Decision](90-Templates/Template-Decision.md)和[Retrospective](90-Templates/Template-Retrospective.md)。提交前替换全部模板变量，并删除无意义的空字段和占位段落。
+从对应模板开始创建内容：[MOC](Z-模板/Template-MOC.md)、[Concept](Z-模板/Template-Concept.md)、[Pattern](Z-模板/Template-Pattern.md)、[Experiment](Z-模板/Template-Experiment.md)、[Project](Z-模板/Template-Project.md)、[Source](Z-模板/Template-Source.md)、[Interview](Z-模板/Template-Interview.md)、[Decision](Z-模板/Template-Decision.md)和[Retrospective](Z-模板/Template-Retrospective.md)。提交前替换全部模板变量，并删除无意义的空字段和占位段落。
 
 ## 来源优先级
 
