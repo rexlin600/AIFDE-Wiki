@@ -1,0 +1,59 @@
+name: Wiki quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "26"
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements-dev.txt
+          npm ci
+
+      - name: Run validator tests
+        run: python -m pytest -q
+
+      - name: Validate Wiki structure
+        run: python scripts/validate_wiki.py .
+
+      - name: Lint Markdown
+        run: npm run lint:md
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2.9.0
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude-mail
+            --exclude 'https://www.zhipin.com/.*'
+            './**/*.md'
+          fail: true
+
+      - name: Scan secrets
+        uses: gitleaks/gitleaks-action@v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
