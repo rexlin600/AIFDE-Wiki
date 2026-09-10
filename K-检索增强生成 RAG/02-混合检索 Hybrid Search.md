@@ -1,102 +1,133 @@
 ---
-type: pattern
+type: concept
 domain:
   - RAG
 depth: L3
 importance: core
-maturity: reviewed
+maturity: draft
 created: 2026-09-09
-updated: 2026-09-09
-last_verified: 2026-09-09
-aliases:
-  - Hybrid Search
-  - 混合召回
-tags:
-  - core
-  - rag
+updated: 2026-09-10
+last_verified: 2026-09-10
+aliases: [Hybrid Search, 混合召回]
+tags: [retrieval, fusion]
 ---
 
-# 混合检索（Hybrid Search）
+# 混合检索 Hybrid Search
 
-## 要解决的问题
+<!-- markdownlint-disable MD012 MD013 -->
 
-单一检索器难以同时稳定处理精确词项与语义改写。BM25 擅长匹配产品编号、专有名词、错误码和原文措辞，却可能漏掉没有共享关键词的同义表达；Dense Retrieval 能用向量相似度找出释义和近义表达，却可能弱化罕见标识符、数字或细粒度否定。混合检索并行生成两类候选，再融合为一个排序列表。
+## 它解决什么 RAG 问题
 
-## 上下文
+企业问答既有错误码 `E1047` 这类精确词，也有“登录凭证失效”与“密码过期”这类语义改写。BM25 擅长前者，Dense 检索常擅长后者。混合检索合并两路候选，降低单一检索器的盲区。
 
-该模式位于 [RAG MOC](./00-%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%20RAG-MOC.md) 的候选召回阶段。语料已经过统一切分、权限过滤和版本管理；同一查询可送入词法检索与向量检索；评测集包含相关文档标注，并按精确词项、释义、中文/英文、代码或编号等查询类型分组。
+## 不理解会造成什么错误
 
-## 方案
+- 直接相加 BM25 分数与余弦相似度，让数值尺度较大的分支支配排序。
+- 只在融合后过滤权限，让越权文档进入候选和日志。
+- 把融合当作精排，忽略两个分支都没召回相关文档的情况。
+- 只看平均 Recall，掩盖编号查询或同义表达切片退化。
 
-1. **Sparse 分支**：在倒排索引上运行 BM25，利用词频、逆文档频率与文档长度归一化给出候选。
-2. **Dense 分支**：用与文档侧兼容的编码器生成查询向量，在向量索引中执行近似或精确近邻搜索。
-3. **融合层**：对两组 Top-N 候选做去重，并通过校准后的分数加权或 Reciprocal Rank Fusion（RRF）形成统一排名。
-4. **可选 Reranker**：只对融合后的较小候选集计算更昂贵的查询—文档相关度，再截取提供给生成模型的 Top-k。
+## 它在 RAG 链路中的位置
 
-融合不应直接相加原始 BM25 分数与向量相似度：两者尺度、分布和查询间可比性不同。若采用线性加权，应先在固定评测集上选择归一化方法（如 Min-Max 或 Z-score）并校准权重；Min-Max 容易受极端值和候选窗口影响，Z-score 在候选很少或分布异常时也不稳定。
+`查询 → Sparse Top-N + Dense Top-N → 去重融合 → 可选重排序 → 上下文`。两个分支必须使用同一语料版本与权限条件；融合输入是文档 ID 和名次，不是生成答案。
 
-RRF 绕过原始分数尺度，按每个列表中的名次累计：
+## 从客服检索开始
 
-```text
-RRF(d) = Σ 1 / (k + rank_i(d))
+查询“E1047 怎样处理”时，只用 Dense 是简单基线；查询“登录凭证失效怎么办”时，只用 BM25 也是基线。先分别评测，再确认两者命中样例互补，才值得承担双索引成本。
+
+## RRF 怎样绕开分数尺度
+
+对文档 $d$，倒数排名融合为：
+
+$$
+\operatorname{RRF}(d)=\sum_{i=1}^{m}\frac{w_i}{c+r_i(d)}
+$$
+
+$m$ 是结果列表数，$r_i(d)$ 是从 1 开始的名次，$c>0$ 平滑低名次影响，$w_i$ 是可选分支权重。文档不在某列表时，该列表贡献为 0。公式只使用排名，因此不会把 BM25 的 `12.4` 与余弦的 `0.82` 当成同一单位。
+
+## 最小手算
+
+取 $c=10$。BM25 排名为 `A,B,C`，Dense 为 `C,A,D`：
+
+- $A=1/11+1/12\approx0.1742$；
+- $C=1/13+1/11\approx0.1678$；
+- $B=1/12\approx0.0833$；$D=1/13\approx0.0769$。
+
+所以融合顺序是 `A,C,B,D`。A 在两路都靠前，累积贡献最大。
+
+## 可执行实验
+
+```python
+def rrf(rankings, constant=10):
+    scores = {}
+    for ranking in rankings:
+        for rank, doc_id in enumerate(ranking, start=1):
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1 / (constant + rank)
+    return sorted(scores, key=lambda doc: (-scores[doc], doc)), scores
+
+bm25 = ["A", "B", "C"]
+dense = ["C", "A", "D"]
+order, scores = rrf([bm25, dense])
+print(order, {key: round(value, 4) for key, value in scores.items()})
+assert order == ["A", "C", "B", "D"]
+
+raw_bm25 = {"A": 12.0, "C": 1.0}
+raw_dense = {"A": 0.7, "C": 0.9}
+bad = sorted(raw_bm25, key=lambda d: -(raw_bm25[d] + raw_dense[d]))
+rescaled = sorted(raw_bm25, key=lambda d: -(raw_bm25[d] / 100 + raw_dense[d]))
+assert bad != rescaled  # 异构分数直接相加依赖任意尺度
+assert rrf([bm25, dense])[0] == order
 ```
 
-其中 `rank_i(d)` 是文档 `d` 在第 `i` 个结果列表中的名次，`k` 控制低排名候选的影响。RRF 易于建立基线，但分支权重、候选窗口与常数仍应记录并评测，而不是假设默认值适合所有语料。
+## 实验结果边界
 
-## 数据流
+实验只证明 RRF 对原始分数缩放不敏感，并验证一次名次计算。它不证明 $c=10$ 最优，也不证明 Hybrid 一定优于单路检索；这些结论需要真实 qrels、统一候选窗口和查询切片。
 
-```text
-查询
- ├─→ BM25 Top-N ─┐
- └─→ Dense Top-N ├─→ 去重与融合 ─→ 可选 Rerank ─→ Top-k 上下文
-                 ┘
-```
+## 质量延迟与成本影响
 
-权限与租户约束必须进入每个召回分支，不能等生成后再过滤。索引版本、分词策略、Embedding 模型和候选窗口应随一次检索 Trace 一起记录，便于复现错误。
+混合检索可能提高 Recall@k，却需要倒排与向量双索引、双路查询和融合 Trace。两路可并行降低等待时间；总延迟仍受较慢分支约束。扩大 Top-N 常提高召回上限，也会增加网络、融合和重排序成本。
 
-## 适用条件
+## 数据评测与安全风险
 
-- 查询同时包含精确标识符和自然语言描述，例如错误码加故障现象。
-- 用户表述与文档用词存在同义、缩写、跨语言或口语差异。
-- 错误分析已证明 Sparse 与 Dense 的成功样例有互补性。
-- 系统能承担双索引、双路查询和可选 Rerank 的额外延迟与维护成本。
+每路都要在候选读取边界执行租户、ACL、时效过滤。索引版本、分词器、Embedding 版本、名次与过滤原因必须可追踪。评测集按精确编号、语义改写、语言和不可回答问题切片，避免只优化热门查询。
 
-若单一 BM25 已满足质量、延迟和成本目标，或语料规模很小且可直接扫描，则没有必要引入该模式。
+## 工程排错
 
-## 代价与风险
-
-- 同时维护倒排索引、向量索引、Embedding 版本和删除传播，存储与运维成本上升。
-- 双路召回扩大查询开销；Reranker 还增加模型推理延迟和按候选计费的成本。
-- 融合权重或候选窗口可能过拟合某个评测集，掩盖某一分支持续退化。
-- Dense 分支的模型升级需要重建或迁移文档向量，并验证新旧索引兼容性。
-
-## 失败模式
-
-| 失败模式 | 可观察信号 | 处理方式 |
+| 现象 | 可能原因 | 优先检查 |
 | --- | --- | --- |
-| 直接相加异构分数 | 某分支长期支配最终排名 | 改用 RRF，或固定归一化与权重后重测 |
-| 候选窗口过小 | 两个分支各自命中，但融合前已截断 | 提高分支 Top-N，并观察延迟与 Recall@k |
-| Dense 模型与文档向量不匹配 | 向量召回突然接近随机或报维度错误 | 绑定模型与索引版本，阻止不兼容发布 |
-| 只在融合后做权限过滤 | Top-k 变空、越权文档进入中间结果 | 在每个分支查询边界内执行过滤 |
-| Rerank 输入过多 | p95 延迟和成本快速增长 | 依据消融实验缩小融合候选集 |
-| 平均指标掩盖退化 | 总分改善但错误码/中文切片下降 | 按查询类型报告指标与失败样例 |
+| 某分支长期支配 | 直接相加异构分数 | 融合公式、原始分数是否进入 RRF |
+| 相关文档融合前消失 | 分支 Top-N 太小 | 各分支 Recall@N、截断位置 |
+| 结果突然接近随机 | 向量模型与索引不兼容 | 模型、维度、归一化和索引版本 |
+| 融合后结果为空 | 权限过滤条件不一致 | 两分支过滤条件与过滤计数 |
+| p95 延迟升高 | 慢分支或候选过多 | 分支耗时、Top-N、重排序窗口 |
 
-## 实现提示
+## 适用与不适用场景
 
-先建立 BM25、Dense、RRF Hybrid 三组可复现基线，再决定是否增加 Rerank。三组必须共用语料版本、查询集、相关性标注、过滤条件和 `k`，并分别报告 Recall@k、MRR、nDCG、p50/p95 延迟、索引大小与单查询成本。Rerank 是融合之后的精排阶段，不应用它掩盖召回集根本没有相关文档的问题。
+适合精确词项和语义改写并存、两路错误互补的语料。若 BM25 已满足目标、语料很小可精确扫描，或系统无法维护双索引，则先不使用。RRF 是稳健基线，不替代有标注数据支持的校准或学习排序。
 
-线上 Trace 至少记录两个分支的候选及名次、融合贡献、最终文档 ID、过滤原因和耗时。发布前用消融验证“去掉 Sparse”“去掉 Dense”“去掉 Rerank”各自造成的变化。
+## 学习收益
 
-## 替代方案
+你应能说清两路候选的生命周期位置，手算 RRF，解释为何不直接加分，并设计含消融、权限和延迟的评测。
 
-- **仅 BM25**：领域词稳定、精确匹配占主导且预算严格时更简单。
-- **仅 Dense Retrieval**：释义匹配为主、已有领域适配编码器且精确标识符不重要时可采用。
-- **学习排序或单一稀疏神经检索器**：有足够标注、训练与监控能力时可能减少手工融合，但引入训练数据偏差和模型运维。
-- **长上下文直接输入**：语料规模可控、单次材料明确且无需独立检索审计时可考虑。
+## 给别人讲清楚
 
-## 相关证据
+“混合检索像让文字匹配和语义匹配各自投票。RRF 按名次计票，不把两种不同单位的分数硬加；但候选里没有的文档，融合也救不回来。”
 
-- [检索基线实验设计](./01-EXP-20260909-%E6%A3%80%E7%B4%A2%E5%9F%BA%E7%BA%BF.md)：定义 BM25、Dense 与 Hybrid 的同口径对照，不预填实验结果。
-- Karpukhin 等，[Dense Passage Retrieval for Open-Domain Question Answering](https://aclanthology.org/2020.emnlp-main.550/)，EMNLP 2020；Dense Retrieval 原始研究证据，访问于 2026-09-09。
-- Elastic，[Hybrid search](https://www.elastic.co/docs/solutions/search/hybrid-search)与[Reciprocal rank fusion](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion)；官方实现文档与 RRF 公式，访问于 2026-09-09。
-- Thakur 等，[BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models](https://openreview.net/forum?id=wCu6T5xFjeJ)，NeurIPS 2021 Datasets and Benchmarks；异构检索评测基准，访问于 2026-09-09。
+## 自检问题
+
+1. 为什么余弦与 BM25 原始分数不能直接相加？
+2. 文档不在某一分支时，RRF 怎样处理？
+3. 权限过滤为什么必须进入每个召回分支？
+
+## 相关主题
+
+- [BM25 稀疏检索](08-BM25%20稀疏检索.md)
+- [Dense 向量检索](09-Dense%20向量检索.md)
+- [RAG 重排序](11-RAG%20重排序.md)
+- [检索基线实验](01-EXP-20260909-检索基线.md)
+
+## 资料来源
+
+- Cormack 等, [Reciprocal Rank Fusion](https://dl.acm.org/doi/10.1145/1571941.1572114), 2009，访问日期：2026-09-10。
+- Elasticsearch, [Reciprocal rank fusion](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion)，访问日期：2026-09-10。
+- Thakur 等, [BEIR](https://openreview.net/forum?id=wCu6T5xFjeJ), 2021，访问日期：2026-09-10。
