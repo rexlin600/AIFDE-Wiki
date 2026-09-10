@@ -6,8 +6,8 @@ depth: L3
 importance: core
 maturity: reviewed
 created: 2026-09-09
-updated: 2026-09-09
-last_verified: 2026-09-09
+updated: 2026-09-10
+last_verified: 2026-09-10
 aliases:
   - 大语言模型
 tags:
@@ -15,88 +15,83 @@ tags:
   - llm
 ---
 
-# LLM MOC
+# 大模型 LLM MOC
+
+<!-- markdownlint-disable MD012 MD013 -->
+
+## 为什么学习大模型
+
+大模型不是一个会回答问题的黑盒，而是一条从文本编码、概率生成到应用约束、适配训练和推理服务的系统链路。理解本目录后，你应能解释响应怎样产生，选择 Prompt、上下文、工具、RAG 或微调，设计可证伪评测，并量化质量、延迟、成本与风险。
 
 ## 领域边界
 
-本领域覆盖大语言模型（Large Language Model，LLM）的文本表示、预训练、对齐与适配、生成推理、应用接口和模型服务选择。重点是从机制到可测工程链路；RAG 检索流程、Agent 编排和通用生产平台分别由相邻领域负责。
+本目录讲 LLM 特有的训练、生成、适配和接口机制。[深度学习](../I-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/00-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0-MOC.md)负责 Transformer 通用结构；[RAG](../K-%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%20RAG/00-%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%20RAG-MOC.md)负责检索与引用；[Agent](../L-%E6%99%BA%E8%83%BD%E4%BD%93%20Agent/00-%E6%99%BA%E8%83%BD%E4%BD%93%20Agent-MOC.md)负责多步工具循环；[生产级 AI](../N-%E7%94%9F%E4%BA%A7%E7%BA%A7%20AI/00-%E7%94%9F%E4%BA%A7%E7%BA%A7%20AI-MOC.md)负责平台运行。
 
-## 前置知识
+## 按 LLM 生命周期学习
 
-- [深度学习](../I-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/00-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0-MOC.md)中的 Attention、Transformer、优化与 PyTorch 工程。
-- [机器学习](../H-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/00-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-MOC.md)中的数据拆分、泛化、指标和错误分析。
-- 能调用 HTTP API、处理 JSON Schema，并记录延迟与成本。
+1. **文本进入模型：** [词元化 Tokenization](<01-词元化 Tokenization.md>) → [文本 Embedding](<02-文本 Embedding.md>)。
+2. **学习语言规律：** [大模型预训练目标](03-大模型预训练目标.md) → [大模型自回归 Transformer](<04-大模型自回归 Transformer.md>)。
+3. **生成下一个 Token：** [大模型生成采样](13-大模型生成采样.md) → [大模型 KV Cache](<14-大模型 KV Cache.md>)。
+4. **约束应用行为：** [大模型提示设计](05-大模型提示设计.md) → [大模型上下文工程](06-大模型上下文工程.md) → [大模型结构化输出](07-大模型结构化输出.md) → [大模型工具调用](08-大模型工具调用.md)。
+5. **评价和选择：** [大模型幻觉](09-大模型幻觉.md) → [大模型选型](10-大模型选型.md)。
+6. **改变模型行为：** [大模型监督微调 SFT](<11-大模型监督微调 SFT.md>) → [LoRA 参数高效微调](<12-LoRA 参数高效微调.md>) → [RLHF 与 DPO](<17-RLHF 与 DPO.md>) → [大模型蒸馏](18-大模型蒸馏.md)。
+7. **交付和扩展：** [大模型量化](15-大模型量化.md) → [大模型服务](16-大模型服务.md) → [大模型从头预训练](19-大模型从头预训练.md) → [稀疏模型与长上下文](20-稀疏模型与长上下文.md)。
 
-## 推荐顺序
+## 按问题选择方法
 
-1. 从 Tokenizer、Embedding、预训练目标与 Transformer 理解输入到下一个 Token 的路径。
-2. 学习采样、上下文、KV Cache、量化和服务，建立质量、延迟与成本意识。
-3. 再学习 Prompt、结构化输出和 Function Calling，构建受控应用接口。
-4. 最后比较 SFT、PEFT/LoRA、RLHF/DPO 与蒸馏，明确何时训练、何时检索或换模型。
+| 问题 | 优先方法 | 不要先做什么 |
+| --- | --- | --- |
+| 指令不清或输出不稳定 | 提示设计和固定评测 | 立即微调 |
+| 关键信息没有进入输入 | 上下文工程或 RAG | 要求模型凭记忆回答 |
+| 必须返回合法字段 | 结构化输出和程序校验 | 用自然语言正则硬解析 |
+| 必须查询或执行动作 | 工具调用和权限隔离 | 让模型伪造工具结果 |
+| 领域事实频繁更新 | RAG 或工具 | 把新知识全塞进 SFT |
+| 稳定行为模式需要学习 | SFT 或 LoRA | 无限增长 Prompt |
+| 需要偏好而非标准答案 | DPO 或受控偏好优化 | 把偏好当事实标签 |
+| 延迟或显存不达标 | KV Cache、量化、批处理、换模型 | 未剖析就盲目压缩 |
 
-## 核心主题
+## 按故障现象学习
 
-| 主题 | 范围 | 建议深度 | 重要程度 |
-| --- | --- | --- | --- |
-| Tokenizer | BPE/Unigram 直觉、词表、特殊 Token、序列长度和中英文成本 | L3 | core |
-| Embedding | Token Embedding、位置表示、句向量用途，以及与生成输出的区别 | L3 | core |
-| 预训练目标 | Causal LM、Masked LM、数据混合、规模规律和训练数据边界 | L2 | core |
-| Transformer | 自回归解码、Attention、残差、归一化、位置编码和因果 Mask | L3 | core |
-| Prompt | 系统/用户消息、指令、Few-shot、版本化和可证伪评测 | L3 | core |
-| Context | Context Engineering、窗口预算、信息排序、截断和上下文污染 | L3 | core |
-| 结构化输出 | JSON Schema、约束解码、解析校验、修复、重试和降级 | L3 | core |
-| Function Calling | 工具描述、参数 Schema、调用结果回填、错误边界和权限隔离 | L3 | core |
-| 幻觉 | 事实错误、无依据生成、拒答、Grounding 和错误分类 | L3 | core |
-| 模型选型 | 质量、模态、上下文、隐私、许可、延迟、吞吐、成本和锁定风险 | L3 | core |
+| 现象 | 优先入口 | 首要检查 |
+| --- | --- | --- |
+| 输入被截断 | [大模型上下文工程](06-大模型上下文工程.md) | Token 预算和截断顺序 |
+| 输出重复或随机 | [大模型生成采样](13-大模型生成采样.md) | 温度、候选过滤和停止条件 |
+| JSON 偶尔解析失败 | [大模型结构化输出](07-大模型结构化输出.md) | Schema、约束、校验和降级 |
+| 工具参数危险或错误 | [大模型工具调用](08-大模型工具调用.md) | 类型、范围、权限和幂等 |
+| 答案流利但无依据 | [大模型幻觉](09-大模型幻觉.md) | 可回答性、来源和拒答策略 |
+| 首 Token 很慢 | [大模型 KV Cache](<14-大模型 KV Cache.md>) | Prompt 长度和 Prefill |
+| 逐 Token 很慢 | [大模型服务](16-大模型服务.md) | Decode、批调度和带宽 |
+| 微调后通用能力下降 | [大模型监督微调 SFT](<11-大模型监督微调 SFT.md>) | 数据混合、学习率和过拟合 |
+| 显存不足 | [大模型量化](15-大模型量化.md) | 权重、KV Cache、激活和并发 |
 
-## 常用主题
+## 统一术语
 
-| 主题 | 范围 | 建议深度 | 重要程度 |
-| --- | --- | --- | --- |
-| SFT | 监督微调（Supervised Fine-Tuning）的数据格式、目标、切分、过拟合和评测 | L2 | common |
-| PEFT/LoRA | 参数高效微调、低秩适配、秩与目标模块、保存和合并 | L3 | common |
-| 采样 | Greedy、Temperature、top-k、top-p、停止条件、随机种子和复现边界 | L3 | common |
-| KV Cache | Prefill/Decode、缓存形状、显存占用、上下文长度与吞吐权衡 | L3 | common |
-| 量化 | 权重/激活精度、PTQ/QAT、校准数据，以及质量、显存和速度权衡 | L2 | common |
-| 模型服务 | 批处理、流式输出、首 Token 延迟、吞吐、并发、超时和供应商抽象 | L3 | common |
+- $B$ 是批大小，$T$ 是序列长度，$V$ 是词表大小，$D$ 是隐藏维度，$L$ 是层数，$H$ 是注意力头数。
+- Logits 是未归一化分数，Softmax 后才是候选 Token 的条件概率。
+- Prefill 并行处理已有上下文，Decode 每步生成一个新 Token。
+- 模型输出是提议；Schema 校验、权限、执行和业务提交由确定性程序负责。
 
-## 拓展视野
+## 上线检查表
 
-| 主题 | 范围 | 建议深度 | 重要程度 |
-| --- | --- | --- | --- |
-| RLHF/DPO | 偏好数据、奖励模型、策略优化和直接偏好优化的目标与风险 | L3 | extension |
-| 蒸馏 | 教师/学生、软标签、响应蒸馏、能力迁移和评测污染 | L3 | extension |
-| 从头预训练 | 数据治理、分词器、分布式训练、检查点和规模预算 | L4 | extension |
-| 稀疏与长上下文 | MoE、稀疏 Attention、位置外推和长上下文评测 | L4 | extension |
-
-## 最小实验
-
-- 比较两种 Tokenizer 对中英文、代码和 JSON 输入的 Token 数量与截断行为。
-- 在固定评测集上比较自由文本、JSON 提示和 Schema 约束输出，记录合规率与失败样例。
-- 用 PyTorch 实现单头因果 Attention 和逐 Token 贪心生成，验证 Mask、形状和停止条件。
-- 比较基础模型与小型 LoRA 适配，记录训练/验证曲线、质量、延迟和显存。
-
-## 项目
-
-- 在 `llm-engineering-lab` 中实现统一模型适配器、Prompt 版本、结构化输出校验、评测集和成本/延迟报告。
-- 以[阶段 2：LLM 工程](../F-%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/03-%E9%98%B6%E6%AE%B5%202-%E5%A4%A7%E6%A8%A1%E5%9E%8B%20LLM%20%E5%B7%A5%E7%A8%8B.md)的退出证据约束复现、适配和模型选择。
-
-## 开源研究
-
-- 跟踪 Transformers 从 Tokenizer、`generate` 到采样的一条公开调用链。
-- 跟踪 PEFT 的 LoRA 模块注入、训练参数、保存与加载路径。
-- 跟踪 vLLM 的模型加载、请求调度、批处理与 OpenAI 兼容服务入口。
-
-## 面试入口
-
-- 从输入到下一个 Token 解释 Transformer 推理与 KV Cache，并量化主要成本。
-- 比较 Prompt、长上下文、RAG、LoRA、全量微调和更换模型的适用条件。
-- 设计可靠的结构化输出与 Function Calling 链路，覆盖校验、超时、重试和降级。
-- 用固定评测集答辩模型选型，并解释幻觉、延迟、成本和隐私取舍。
+| 阶段 | 必须能回答的问题 |
+| --- | --- |
+| 输入 | 使用哪个 Tokenizer、模板和截断策略 |
+| 行为 | Prompt、上下文、工具或适配模型的版本是什么 |
+| 输出 | 怎样校验、拒答、重试和降级 |
+| 评测 | 固定集覆盖哪些错误、怎样避免污染 |
+| 性能 | 输入输出 Token、首 Token、逐 Token、吞吐和成本是多少 |
+| 安全 | 数据能否发送、工具能做什么、日志如何脱敏 |
 
 ## 相邻领域
 
-- [深度学习](../I-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/00-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0-MOC.md)：提供 Transformer、训练与推理机制。
-- [机器学习](../H-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/00-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-MOC.md)：提供评测、泛化和错误分析方法。
-- [AI 全局知识地图](../E-%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97/01-AI%20%E7%9F%A5%E8%AF%86%E5%9C%B0%E5%9B%BE.md)：查看 LLM 与 RAG、Agent、生产和安全的依赖关系。
-- [AI/FDE 七阶段路线](../F-%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/00-%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF-MOC.md)：把领域知识落实为阶段实验与项目证据。
+- [深度学习](../I-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/00-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0-MOC.md)：Attention、Transformer、训练和 PyTorch。
+- [机器学习](../H-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/00-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-MOC.md)：拆分、基线、指标和错误分析。
+- [RAG](../K-%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%20RAG/00-%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%20RAG-MOC.md)：外部知识、引用和权限检索。
+- [Agent](../L-%E6%99%BA%E8%83%BD%E4%BD%93%20Agent/00-%E6%99%BA%E8%83%BD%E4%BD%93%20Agent-MOC.md)：多步决策与可靠工具循环。
+- [生产级 AI](../N-%E7%94%9F%E4%BA%A7%E7%BA%A7%20AI/00-%E7%94%9F%E4%BA%A7%E7%BA%A7%20AI-MOC.md)：网关、观测、容量和发布。
+
+## 资料来源
+
+- Hugging Face, [Transformers documentation](https://huggingface.co/docs/transformers/)，访问日期：2026-09-10。
+- Hugging Face, [TRL documentation](https://huggingface.co/docs/trl/)，访问日期：2026-09-10。
+- vLLM, [Documentation](https://docs.vllm.ai/)，访问日期：2026-09-10。

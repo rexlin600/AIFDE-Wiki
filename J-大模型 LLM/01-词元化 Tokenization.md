@@ -4,97 +4,149 @@ domain:
   - LLM
 depth: L3
 importance: core
-maturity: reviewed
+maturity: draft
 created: 2026-09-09
-updated: 2026-09-09
-last_verified: 2026-09-09
+updated: 2026-09-10
+last_verified: 2026-09-10
 aliases:
-  - Tokenization
   - Tokenizer
 tags:
-  - core
-  - llm
+  - tokenization
+  - llm-input
 ---
 
-# 词元化（Tokenization）
+# 词元化 Tokenization
 
-## 一句话定义
+<!-- markdownlint-disable MD012 MD013 -->
 
-词元化（Tokenization）把原始文本按固定规则转换为模型词表中的 Token ID 序列，并在生成后把 ID 序列解码回文本。
+## 它解决什么 LLM 问题
 
-## 为什么重要
+模型不能直接读取文字。Tokenizer 把文本变成有限词表中的 Token ID，也把输出 ID 还原成文本。它同时决定输入长度、上下文占用、计算量、计费和特殊消息协议。
 
-模型并不直接读取字符或单词，而是读取 Token ID 对应的向量。分词结果同时决定序列长度、上下文窗口占用、训练与推理计算量，以及按 Token 计费的 API 成本。它还影响中文、代码、罕见词和特殊格式能否被紧凑且稳定地表示。
+## 不理解会造成什么错误
 
-## 工作原理
+- 用字符数估算窗口，中文、代码或 JSON 被意外截断。
+- 模型权重与 Tokenizer 不匹配，程序能跑但语义完全错误。
+- 把用户文本当特殊 Token 解析，破坏角色或停止边界。
+- 认为 Token 越少质量必然越高，忽略词表参数和低频学习。
 
-### 粒度选择
-
-- **字符级（Character-level）**词表小，几乎不会遇到未知词，但序列通常更长，模型需要从更细粒度学习词义。
-- **词级（Word-level）**序列较短且易解释，但词形变化、拼写变化和新词会快速扩大词表，并产生词表外问题。
-- **子词级（Subword-level）**在两者之间折中：常见片段保留为一个 Token，罕见词可拆成多个已知片段。现代 LLM 通常采用这一粒度或其字节级变体。
-
-### 常见算法
-
-- **Byte Pair Encoding（BPE）**从细粒度符号开始，反复合并训练语料中高频的相邻符号对，得到固定大小的子词词表。应用到文本时按学习到的合并规则组合符号。
-- **WordPiece**也建立子词词表；常见实现编码时从当前位置选择词表中可匹配的最长片段。它与 BPE 的训练准则和边界标记并不相同，不能只凭名称互换分词器。
-- **Unigram Language Model**先保留较大的候选子词集合，用概率模型评价不同切分，再逐步删减对语料似然贡献较小的候选；编码时选择高概率切分。SentencePiece 可直接从原始句子训练 BPE 或 Unigram 模型。
-
-### 特殊 Token
-
-分词器还定义模型协议中的特殊 Token，例如序列开始/结束、填充、未知项、消息角色或工具调用边界。它们可能不对应用户可见文本，却参与掩码、停止条件和对话模板。把普通文本与特殊 Token 混用，可能改变提示结构或提前终止生成。
-
-### 词表大小的权衡
-
-较大词表通常能用更少 Token 表示常见文本，但会扩大输入嵌入和输出投影，并让低频词项得到更少训练样本；较小词表减少这些参数，却可能拉长序列。不能只比较词表大小，应同时测量目标语料的 Token 数、未知/字节回退行为、模型质量、延迟和成本。
-
-## 最小示例
-
-假设词表含有 `play`、`ing`、`player`，而不含 `playing`：
+## 它在 LLM 链路中的位置
 
 ```text
-输入：playing
-一种可能切分：[play] [ing]
-输出：两个 Token ID
+原始文本 → 规范化 → 切分 → Token ID [B,T]
+→ Embedding [B,T,D] → Transformer → 输出 ID → 解码文本
 ```
 
-这只是机制示意；实际边界、空格标记、大小写处理和 ID 完全由具体分词器文件决定，不能据此推断任一真实模型的切分结果。
+Tokenizer 是模型契约的一部分。它的词表、合并规则、规范化、特殊 Token 和对话模板都必须与权重版本一起保存。
 
-## 适用场景
+## 从中英文客服输入开始
 
-- 估算提示与响应能否放入上下文窗口，以及预算和截断策略。
-- 比较模型处理中文、英文、代码、JSON、标识符和领域术语的表示效率。
-- 训练或适配模型前选择词表、规范化、字节回退和特殊 Token 协议。
-- 排查输出乱码、异常重复、停止条件失效或消息模板不兼容。
+用户输入可能同时包含中文、英文产品名、订单号和 JSON。预测对象是下一 Token，输入成本按完整系统消息、工具 Schema、历史和用户文本的 Token 总数计算。基线是直接使用目标模型自带 Tokenizer，不自行更换词表。
 
-## 不适用场景
+## 三种粒度
 
-- Token 数不能代替字符数、词数或用户可见内容长度；不同分词器的计数不可直接互换。
-- 分词更短不自动意味着模型质量更好；训练数据、架构和任务共同决定效果。
-- 不应在没有重新训练或明确迁移过程时给既有模型随意更换词表。
+- 字符级词表小、几乎无未知项，但序列长。
+- 词级直观，但新词、词形和拼写会快速扩大词表。
+- 子词在二者间折中，常见片段保持整体，罕见内容继续拆分；字节回退还可覆盖任意文本。
 
-## 常见误区
+## BPE 合并怎样产生词表
 
-- **“一个汉字就是一个 Token”**：中文可能按单字、多字片段或 UTF-8 字节组合切分，结果取决于词表和算法。
-- **“一行代码的 Token 数与字符数成固定比例”**：缩进、空白、运算符、长标识符和少见 API 名称都会改变切分。
-- **“同系列模型必然共用 Tokenizer”**：版本、词表、特殊 Token 和对话模板都可能变化，必须读取具体模型配置。
-- **“Token ID 有跨模型含义”**：ID 只是某个词表中的索引；同一个整数在另一个词表里可能代表完全不同的片段。
+从字符或字节符号开始，统计所有相邻对的频次，每轮合并最常见的一对。设语料切分为若干序列，第 $k$ 轮选择：
 
-## 工程实践
+$$
+(a_k,b_k)=\arg\max_{(a,b)}\operatorname{count}_k(a,b)
+$$
 
-Tokenizer 必须与模型权重匹配，因为 Token ID 会索引模型已经训练好的嵌入行，输出 ID 也要由同一词表解码。错配会让输入片段映射到错误向量，或者让特殊 Token、词表大小与输出头不一致；即使程序因尺寸相同而能运行，语义仍可能完全错误。
+然后把每个相邻的 $a_k,b_k$ 替换为新符号 $a_kb_k$。训练得到的是有顺序的合并规则；编码新文本时必须按规则应用，而不是重新统计新文本。
 
-对生产输入应使用实际模型的官方 Tokenizer 计数，并把系统消息、工具 Schema、检索上下文和预留输出一起计入窗口。对中文与代码分别建立代表性样本，记录每类输入的 Token 分布和截断位置，而不是依赖“字符数乘固定系数”的估算。
+Unigram 则从较大候选词表出发，用概率模型评价切分并逐步删除贡献较小的子词。两者都能产生子词词表，但目标与编码算法不同。
 
-## 相关概念
+## 最小手算
 
-- [LLM MOC](./00-%E5%A4%A7%E6%A8%A1%E5%9E%8B%20LLM-MOC.md)：分词是从文本到 Transformer 输入的第一步。
-- Context Window：上限按 Token 而不是用户可见字符计算。
-- Embedding：Tokenizer 产生的 ID 用来查找 Token Embedding；句向量模型也有自己的配套分词器。
-- KV Cache：同一请求的 Token 数增加会扩大 Prefill 工作量和缓存占用。
+语料只有 `low low lower`，初始写为字符加词尾。第一轮相邻对 `l-o` 出现 3 次，若合并成 `lo`，序列变短。随后 `lo-w` 仍出现 3 次，可合并成 `low`。常见词逐渐成为单 Token，`lower` 仍可表示为 `low e r`。
+
+## 可执行实验
+
+```python
+from collections import Counter
+
+corpus = [tuple(word) + ("</w>",) for word in "low low lower".split()]
+
+def pairs(words):
+    return Counter(pair for word in words for pair in zip(word, word[1:]))
+
+def merge(words, target):
+    output = []
+    for word in words:
+        merged = []
+        index = 0
+        while index < len(word):
+            if index + 1 < len(word) and word[index:index + 2] == target:
+                merged.append("".join(target))
+                index += 2
+            else:
+                merged.append(word[index])
+                index += 1
+        output.append(tuple(merged))
+    return output
+
+for _ in range(2):
+    best = pairs(corpus).most_common(1)[0]
+    print("merge", best)
+    corpus = merge(corpus, best[0])
+print(corpus)
+```
+
+输出应先合并 `l+o`，再合并 `lo+w`。真实 BPE 还要处理词边界、并列频次、字节和特殊 Token。
+
+## 实验结果解释
+
+这个实验说明高频片段如何变成词表项，不代表任一真实模型会得到相同 ID。比较 Tokenizer 时，应在目标语料上报告 Token 数分布、截断率、字节回退、往返一致性和特殊 Token 行为。
+
+## 质量延迟与成本影响
+
+Attention 计算随序列长度增长，KV Cache 也随 Token 数增加。更大的词表可能缩短序列，却扩大输入 Embedding 和输出投影。中英文、代码、表格和 JSON 应分别测量，不能用统一“字符除以四”估算。
+
+## 数据评测与安全风险
+
+训练自有 Tokenizer 时，规范化可能抹掉大小写、空白或医学符号。把未转义的用户输入拼进特殊 Token 协议会形成提示边界问题。评测集必须使用实际部署的模板和 Tokenizer 版本。
+
+## 工程排错
+
+| 现象 | 可能原因 | 优先检查 |
+| --- | --- | --- |
+| 中文成本异常高 | 目标语料在词表中覆盖差 | 分语言 Token 分布、字节回退 |
+| 输出乱码 | ID 解码或字节边界错误 | 同一 Tokenizer 往返、特殊 Token |
+| 提前停止 | 普通文本被解析成终止符 | 特殊 Token 注入、解码参数 |
+| 模型质量突然崩溃 | Tokenizer 与权重错配 | 词表哈希、大小、模板版本 |
+| 窗口偶尔超限 | 只计算用户正文 | 系统消息、Schema、历史、输出预留 |
+
+## 适用与不适用场景
+
+所有 LLM 请求都需要准确 Token 计数。已有模型应使用配套 Tokenizer；只有从头预训练或有完整迁移方案时才考虑改变词表。Token 更短只是效率证据，不是质量证据。
+
+## 学习收益
+
+你应能解释文本怎样变成 ID，手算 BPE 合并，审计特殊 Token 与版本匹配，并在真实语料上估算窗口和成本。
+
+## 给别人讲清楚
+
+“Tokenizer 是模型的字典和切字规则。模型看到的不是字，而是字典编号；换错字典，就像拿着另一版密码本读同一串数字。”
+
+## 自检问题
+
+1. 为什么同一段中文在不同模型中 Token 数不同？
+2. 更大词表有哪些成本？
+3. 为什么 Tokenizer 必须与模型权重一起版本化？
+
+## 相关主题
+
+- [文本 Embedding](<02-文本 Embedding.md>)
+- [大模型上下文工程](06-大模型上下文工程.md)
+- [大模型从头预训练](19-大模型从头预训练.md)
 
 ## 资料来源
 
-- Sennrich、Haddow 与 Birch，[Neural Machine Translation of Rare Words with Subword Units](https://aclanthology.org/P16-1162/)，ACL 2016；BPE 子词方法原始论文，访问于 2026-09-09。
-- Kudo 与 Richardson，[SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing](https://aclanthology.org/D18-2012/)，EMNLP 2018；介绍直接从原始句子训练 BPE/Unigram 分词模型，访问于 2026-09-09。
-- Google Research，[BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://research.google/pubs/bert-pre-training-of-deep-bidirectional-transformers-for-language-understanding/)，2018；记录 BERT 使用 WordPiece 词表，访问于 2026-09-09。
+- Rico Sennrich 等, [Neural Machine Translation of Rare Words with Subword Units](https://aclanthology.org/P16-1162/), 2016，访问日期：2026-09-10。
+- Taku Kudo, John Richardson, [SentencePiece](https://aclanthology.org/D18-2012/), 2018，访问日期：2026-09-10。
+- Hugging Face, [Tokenizer](https://huggingface.co/docs/transformers/main_classes/tokenizer)，访问日期：2026-09-10。
